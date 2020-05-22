@@ -6,9 +6,21 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "add": "^2.0.6",
+    "csvtojson": "^2.0.10",
     "react": "^16.13.1",
+    "react-barcode-reader": "^0.0.2",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1"
+    "react-redux": "^7.2.0",
+    "react-scripts": "3.4.1",
+    "redux": "^4.0.5",
+    "redux-devtools-extension": "^2.13.8",
+    "redux-thunk": "^2.3.0",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^0.88.2",
+    "validator": "^13.0.0",
+    "victory": "^34.3.6",
+    "yarn": "^1.22.4"
   },
   "scripts": {
     "start": "react-scripts start",
