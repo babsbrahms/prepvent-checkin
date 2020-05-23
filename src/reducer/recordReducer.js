@@ -6,7 +6,9 @@ let init = {
     url: '',
     list: [],
     count: 0,
-    checked: 0
+    checked: 0,
+    keys: [], 
+    filename: ''
 }
 
 function recordReducer (state = init, action) {

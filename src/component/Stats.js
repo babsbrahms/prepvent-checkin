@@ -239,7 +239,8 @@ const mapStateToProps = (state) => ({
     list: state.record.list,
     eventId: state.record.eventId,
     count: state.record.count,
-    checked: state.record.checked
+    checked: state.record.checked,
+    schema: state.schema
 })
 
 export default connect(mapStateToProps)(Stats)

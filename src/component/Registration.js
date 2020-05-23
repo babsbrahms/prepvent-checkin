@@ -203,7 +203,8 @@ class Registration extends Component {
 const mapStateToProps = (state) => ({
   eventId: state.record.eventId,
   count: state.record.count,
-  list: state.record.list
+  list: state.record.list,
+  schema: state.schema
 })
 
 export default connect(mapStateToProps, { checkin:CheckInAction, checkout: CheckOutAction})(Registration)

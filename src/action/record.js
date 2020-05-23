@@ -1,4 +1,4 @@
-import { ADD_RECORD, CLEAR_RECORD, CHECK_OUT, CHECK_IN } from '../types';
+import { ADD_RECORD, CLEAR_RECORD, CHECK_OUT, CHECK_IN, MODIFY_SCHEMA } from '../types';
 
 export const addRecordAction = (data) => dispatch => dispatch({
     type: ADD_RECORD,
@@ -20,4 +20,9 @@ export const CheckInAction = (id) => dispatch => Promise.resolve().then(() => {
 export const CheckOutAction = (id) => dispatch => Promise.resolve().then(() => dispatch({
     type: CHECK_OUT,
     payload: id
+}))
+
+export const ModifySchemaAction = (data) => dispatch => Promise.resolve().then(() => dispatch({
+    type: MODIFY_SCHEMA,
+    payload: data
 }))
