@@ -30,14 +30,16 @@ class Registration extends Component {
 
   onSubmit = () => {
     const { number } = this.state;
-    const {list, addAlert} = this.props;
+    const {list, addAlert, removeAlert} = this.props;
 
+    removeAlert()
     let index = list.findIndex(x => x.registrationNumber === number)
     
     if (index >= 0) {
       this.setState({ data: { ...list[index], index }})
     } else {
       addAlert('Error', 'Record not found', false, false)
+      this.setState({ data: { }})
     }  
   }
 
@@ -47,20 +49,20 @@ class Registration extends Component {
       if (status) {
         checkout(id)
         .then(() => {
-          this.setState({ data: { }, loading: false })
+          this.setState({ data: { }, loading: false, number: '' })
         })
         .catch(() => {
           addAlert('Error', 'Problem checking out', false, false);
-          this.setState({ loading: false })
+          this.setState({ loading: false, number: '' })
         })
       } else {
         checkin(id)
         .then(() => {
-          this.setState({ data: { }, loading: false })
+          this.setState({ data: { }, loading: false, number: '' })
         })
         .catch(() => {
           addAlert('Error', 'Problem checking in', false, false);
-          this.setState({ loading: false })
+          this.setState({ loading: false, number: '' })
         })
       }
     })
@@ -118,6 +120,7 @@ class Registration extends Component {
                 <Form onSubmit={() => this.onSubmit()}>
                 
                   <Input
+                    value={number}
                     icon={<Icon name='filter' color='pink' inverted  link onClick={() => this.onSubmit()} />}
                     placeholder='Enter Registration Number'
                     onChange={(e) => this.setState({ number: e.target.value })}

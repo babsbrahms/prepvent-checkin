@@ -1,11 +1,16 @@
 import React, { Component } from 'react'
-import { Dropdown, Icon, Menu, Segment, Table, Input } from 'semantic-ui-react'
+import { Dropdown, Icon, Menu, Segment, Table, Input, Select, Button, Message } from 'semantic-ui-react'
 import * as csv from "csvtojson";
 import { connect } from 'react-redux'
 import validator from 'validator';
 import { addRecordAction } from '../action/record'
 
-
+const options = [
+  { key: 'all', text: 'Name', value: 'fullname' },
+  { key: 'registation', text: 'Registration Number', value: 'registrationNumber' },
+  { key: 'contact', text: 'Contact', value: 'contact' },
+  { key: 'ticketNam', text: 'Ticket Name', value: 'ticketName' },
+];
 
 class Records extends Component {
     constructor(props) {
@@ -80,10 +85,37 @@ class Records extends Component {
       document.getElementById('list-uploader').click()
     }
 
+
+  getRegistrationList = () => {
+      const { list } = this.props;
+      // csvtojson({})
+      this.startDownload(`Registeration List.csv`, list);
+
+  }
+
+  startDownload = (filename, text) => {
+      var element = document.createElement('a');
+      element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(text));
+      element.setAttribute('download', filename);
+  
+      element.style.display = 'none';
+      document.body.appendChild(element);
+  
+      element.click();
+  
+      document.body.removeChild(element);
+  }
+
     render () {
       const { list, count } = this.props;
       return (
         <div>
+          {(count === 0) && (<div>
+            <Message info>
+                <Message.Header>Info</Message.Header>
+                <Message.Content>Info records using the <Icon name='wrench' /> icon </Message.Content>
+            </Message>
+        </div>)}
         <Menu attached='top'>
           <Dropdown item icon='wrench' simple>
             <Dropdown.Menu>
@@ -96,7 +128,15 @@ class Records extends Component {
                   <Dropdown.Item disabled>from PrepVENT</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown.Item>
-              <Dropdown.Item disabled={count === 0} >Save</Dropdown.Item>
+              <Dropdown.Item disabled={count === 0} >
+              <Icon name='dropdown' />
+                <span className='text'>Save</span>
+    
+                <Dropdown.Menu>
+                  <Dropdown.Item>Locally</Dropdown.Item>
+                  <Dropdown.Item disabled>Online</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown.Item>
               {/* <Dropdown.Divider />
               <Dropdown.Header>Export</Dropdown.Header>
               <Dropdown.Item>Share</Dropdown.Item> */}
@@ -104,7 +144,12 @@ class Records extends Component {
           </Dropdown>
     
           <Menu.Menu position='right'>
-            <div className='ui right aligned category search item'>
+            <Input type='text' placeholder='Search...' action>
+              <input />
+              <Select compact options={options} defaultValue='fullname' />
+              <Button type='submit'>Search</Button>
+            </Input>
+            {/* <div className='ui right aligned category search item'>
               <div className='ui transparent icon input'>
                 <input
                   className='prompt'
@@ -114,7 +159,7 @@ class Records extends Component {
                 <i className='search link icon' />
               </div>
               <div className='results' />
-            </div>
+            </div> */}
           </Menu.Menu>
         </Menu>
         {(<div style={{ height: 0, width: 0}}>

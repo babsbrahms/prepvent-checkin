@@ -7,7 +7,7 @@ import Records from './Records'
 
 export default class page extends Component {
   state = {
-    activeItem: 'Check In',
+    activeItem: 'Stats',
     visible: true,
     alert: {
       title: '',
@@ -20,6 +20,8 @@ export default class page extends Component {
   change = name => this.setState({ activeItem: name, visible: false, alert: {} })
 
   addAlert = (t, m, s, p) => this.setState({ alert: { title: t, message: m, success: s, permernent: p }})
+
+  removeAlert= () => this.setState({ alert: { }})
 
   render() {
     const { activeItem, visible, alert } = this.state;
@@ -67,9 +69,9 @@ export default class page extends Component {
           <Icon name="content" size="big" onClick={() => this.setState({ visible: true })}/>
           <br />
           <br />
-          {(activeItem === 'Check In') && (<Registration addAlert={(t,m,s,p) => this.addAlert(t,m,s, p)} />)}
-          {(activeItem === 'Stats') && (<Stats addAlert={(t,m,s,p) => this.addAlert(t,m,s, p)} />)}
-          {(activeItem === 'Records') && (<Records addAlert={(t,m,s,p) => this.addAlert(t,m,s, p)} />)}
+          {(activeItem === 'Check In') && (<Registration removeAlert={() => this.removeAlert()} addAlert={(t,m,s,p) => this.addAlert(t,m,s, p)} />)}
+          {(activeItem === 'Stats') && (<Stats  removeAlert={() => this.removeAlert()} addAlert={(t,m,s,p) => this.addAlert(t,m,s, p)} />)}
+          {(activeItem === 'Records') && (<Records  removeAlert={() => this.removeAlert()} addAlert={(t,m,s,p) => this.addAlert(t,m,s, p)} />)}
           <br />
           <br />
           <br />
