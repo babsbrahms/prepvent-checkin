@@ -3,7 +3,7 @@ import { Dropdown, Icon, Menu, Segment, Table, Input, Select, Button, Message, M
 import * as csv from "csvtojson";
 import { connect } from 'react-redux'
 import validator from 'validator';
-import { addRecordAction, CheckInAction, CheckOutAction, ModifySchemaAction } from '../action/record'
+import { addRecordAction, ModifySchemaAction } from '../action/record'
 
 const options = [
   { key: 'all', text: 'Name', value: 'fullname' },
@@ -79,7 +79,7 @@ class Records extends Component {
 
             let keys = Object.keys(result[0]);
 
-            addRecord({ list: result, count: result.length, keys, filename })
+            addRecord({ list: result, count: result.length, keys, filename, method: 'local' })
 
             this.setState({ keys, modalOpen: true })
         } else {
@@ -144,6 +144,13 @@ class Records extends Component {
             </Message>
         </div>)}
 
+        {(count > 0) && (!schema.ID) && (<div>
+            <Message info>
+                <Message.Header>Info</Message.Header>
+                <Message.Content> Add ID key to your record schema by using the <Icon name='wrench' /> icon </Message.Content>
+            </Message>
+        </div>)}
+
         <Modal 
         open={this.state.modalOpen}
         onClose={this.closeModal}
@@ -178,7 +185,7 @@ class Records extends Component {
                       <Divider horizontal>Or</Divider>
                       <Button fluid basic color={'blue'}>GENERATE</Button>
                     </Table.Cell>
-                    <Table.Cell>A unique value to every attendee in the rocord</Table.Cell>
+                    <Table.Cell>A unique identifier for each attendee in the rocord.</Table.Cell>
                     <Table.Cell><Icon name="checkmark" /></Table.Cell>
                   </Table.Row>
 
@@ -251,7 +258,7 @@ class Records extends Component {
           <Menu.Menu position='right'>
             <Input type='text' placeholder='Search...' action>
               <input />
-              <Select compact options={options} defaultValue='fullname' />
+              <Select compact options={keys.map(x => ({ key: x, text: x, value: x }))} defaultValue='fullname' />
               <Button type='submit'>Search</Button>
             </Input>
             {/* <div className='ui right aligned category search item'>
@@ -306,7 +313,8 @@ const mapStateToProps = (state) => ({
   eventId: state.record.eventId,
   count: state.record.count,
   keys: state.record.keys,
-  schema: state.schema
+  schema: state.schema,
+  method: state.record.method
 })
 
 const mapDispatchToProps = {

@@ -1,4 +1,4 @@
-import { ADD_RECORD, CLEAR_RECORD, CHECK_IN, CHECK_OUT } from '../types'
+import { ADD_RECORD, CLEAR_RECORD, LOCAL_CHECK_IN, LOCAL_CHECK_OUT } from '../types'
 
 let init = {
     eventId: '',
@@ -8,7 +8,9 @@ let init = {
     count: 0,
     checked: 0,
     keys: [], 
-    filename: ''
+    groups: [],
+    filename: '',
+    method: '',
 }
 
 function recordReducer (state = init, action) {
@@ -18,17 +20,38 @@ function recordReducer (state = init, action) {
         case CLEAR_RECORD:
             return state = { }
 
-        case CHECK_IN: 
+        case LOCAL_CHECK_IN: 
             state.checked = state.checked + 1;
-            state.list[action.payload].checkin_status = true;
-            state.list[action.payload].timestamp = new Date().getTime();
+            state.list[action.payload.id].checkin_status = true;
+            state.list[action.payload.id].timestamp = new Date().getTime();
+            console.log('group: ', action.payload.group);
+            
+            // if (!!action.payload.group) {
+            //     let index = state.groups.findIndex(i => i.x === action.payload.group);
+
+            //     if (index < 0) {
+            //         state.groups = [...state.groups, { x: action.payload.group, y: 1 }]
+            //     } else {
+            //         state.groups[index].y = state.groups[index].y + 1;
+            //     }
+            // }
 
             return state = { ...state }
 
-        case CHECK_OUT: 
+        case LOCAL_CHECK_OUT: 
             state.checked = state.checked - 1;
-            state.list[action.payload].checkin_status = false;
-            state.list[action.payload].timestamp = new Date().getTime();
+            state.list[action.payload.id].checkin_status = false;
+            state.list[action.payload.id].timestamp = new Date().getTime();
+
+            // if (!!action.payload.group) {
+            //     let index = state.groups.findIndex(i => i.x === action.payload.group);
+
+            //     if (index < 0) {
+            //         state.groups = state.groups.splice(index, 1)
+            //     } else {
+            //         state.groups[index].y = state.groups[index].y - 1;
+            //     }
+            // }
 
             return state = { ...state }
 

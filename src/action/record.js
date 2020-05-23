@@ -1,4 +1,4 @@
-import { ADD_RECORD, CLEAR_RECORD, CHECK_OUT, CHECK_IN, MODIFY_SCHEMA } from '../types';
+import { ADD_RECORD, CLEAR_RECORD, LOCAL_CHECK_OUT, LOCAL_CHECK_IN, MODIFY_SCHEMA } from '../types';
 
 export const addRecordAction = (data) => dispatch => dispatch({
     type: ADD_RECORD,
@@ -10,16 +10,16 @@ export const crearRecordAction = () => dispatch => dispatch({
     payload: {}
 })
 
-export const CheckInAction = (id) => dispatch => Promise.resolve().then(() => {
+export const localCheckInAction = (id, group) => dispatch => Promise.resolve().then(() => {
     dispatch({
-        type: CHECK_IN,
-        payload: id
+        type: LOCAL_CHECK_IN,
+        payload: { id, group }
     })
 })
 
-export const CheckOutAction = (id) => dispatch => Promise.resolve().then(() => dispatch({
-    type: CHECK_OUT,
-    payload: id
+export const localCheckOutAction = (id, group) => dispatch => Promise.resolve().then(() => dispatch({
+    type: LOCAL_CHECK_OUT,
+    payload: { id, group }
 }))
 
 export const ModifySchemaAction = (data) => dispatch => Promise.resolve().then(() => dispatch({

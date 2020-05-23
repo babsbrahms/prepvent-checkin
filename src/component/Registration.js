@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Input, Menu, Segment, Card, Icon, Form, Message, Button } from 'semantic-ui-react';
 import BarcodeReader from 'react-barcode-reader';
 import { connect } from 'react-redux';
-import { CheckInAction, CheckOutAction } from "../action/record"
+import { localCheckInAction, localCheckOutAction } from "../action/record"
 
 class Registration extends Component {
   state = { 
@@ -30,10 +30,10 @@ class Registration extends Component {
 
   onSubmit = () => {
     const { number } = this.state;
-    const {list, addAlert, removeAlert} = this.props;
+    const {list, addAlert, removeAlert, schema} = this.props;
 
     removeAlert()
-    let index = list.findIndex(x => x.registrationNumber === number)
+    let index = list.findIndex(x => x[schema.ID] === number)
     
     if (index >= 0) {
       this.setState({ data: { ...list[index], index }})
@@ -43,34 +43,38 @@ class Registration extends Component {
     }  
   }
 
-  changeStatus = (id, status) => {
-    const { checkin, checkout, addAlert } = this.props;
+  changeStatus = (id, status, group) => {
+    const { localCheckOut, localCheckIn, addAlert, method } = this.props;
     this.setState({ loading: true }, () => {
-      if (status) {
-        checkout(id)
-        .then(() => {
-          this.setState({ data: { }, loading: false, number: '' })
-        })
-        .catch(() => {
-          addAlert('Error', 'Problem checking out', false, false);
-          this.setState({ loading: false, number: '' })
-        })
+      if (method === 'local') {
+        if (status) {
+          localCheckOut(id, group)
+          .then(() => {
+            this.setState({ data: { }, loading: false, number: '' })
+          })
+          .catch(() => {
+            addAlert('Error', 'Problem checking out', false, false);
+            this.setState({ loading: false, number: '' })
+          })
+        } else {
+          localCheckIn(id, group)
+          .then(() => {
+            this.setState({ data: { }, loading: false, number: '' })
+          })
+          .catch(() => {
+            addAlert('Error', 'Problem checking in', false, false);
+            this.setState({ loading: false, number: '' })
+          })
+        }
       } else {
-        checkin(id)
-        .then(() => {
-          this.setState({ data: { }, loading: false, number: '' })
-        })
-        .catch(() => {
-          addAlert('Error', 'Problem checking in', false, false);
-          this.setState({ loading: false, number: '' })
-        })
+        
       }
     })
   }
 
   render() {
     const { activeItem, number, loading, data } = this.state;
-    const { count, eventId } = this.props;
+    const { count, schema } = this.props;
 
     return (
       <div>
@@ -103,11 +107,18 @@ class Registration extends Component {
             {(count === 0) && (<div>
               <Message info>
                 <Message.Header>Info</Message.Header>
-                <Message.Content>Add records to start the checkin process</Message.Content>
+                <Message.Content>Add records to start the checkin process by pressing the <Icon name='content' /> icon and navigating to the records tab</Message.Content>
               </Message>
             </div>)}
 
-            {(count > 0) && (<div>
+            {(count > 0) && (!schema.ID) && (<div>
+            <Message info>
+                <Message.Header>Info</Message.Header>
+                <Message.Content> Modify your record schema by pressing the <Icon name='content' /> icon and navigating to the records tab </Message.Content>
+            </Message>
+          </div>)}
+
+            {(count > 0) && (!!schema.ID) && (<div>
               {(activeItem === 'scan') && (<div style={{ flex: 1 }}>
                 <BarcodeReader
                   onError={this.handleError}
@@ -122,7 +133,7 @@ class Registration extends Component {
                   <Input
                     value={number}
                     icon={<Icon name='filter' color='pink' inverted  link onClick={() => this.onSubmit()} />}
-                    placeholder='Enter Registration Number'
+                    placeholder={`Enter ${schema.ID}`}
                     onChange={(e) => this.setState({ number: e.target.value })}
                   />
                 </Form>
@@ -137,59 +148,59 @@ class Registration extends Component {
             <br />
 
           <Card.Group centered>
-            <Card>
+            {(!!schema.name) && (<Card>
               <Card.Content>
                 <Card.Header textAlign="center">
-                  Name
+                  {schema.name}
                 </Card.Header>
                 <Card.Meta textAlign="center">
-                  {data.fullname}
+                  {data[schema.name]}
                 </Card.Meta>
               </Card.Content>
-            </Card>
+            </Card>)}
 
 
-            <Card>
+            {(!!schema.ID) && (<Card>
               <Card.Content>
                 <Card.Header textAlign="center">
-                  Registration Number
+                  {schema.ID}
                 </Card.Header>
                 <Card.Meta textAlign="center">
-                  {data.registrationNumber}
+                  {data[schema.ID]}
                 </Card.Meta>
               </Card.Content>
-            </Card>
+            </Card>)}
 
 
-            <Card>
+            {(!!schema.contact) && (<Card>
               <Card.Content>
                 <Card.Header textAlign="center">
-                  Contact
+                  {schema.contact}
                 </Card.Header>
                 <Card.Meta textAlign="center">
-                  {data.contact}
+                  {data[schema.contact]}
                 </Card.Meta>
               </Card.Content>
-            </Card>
+            </Card>)}
 
 
 
-            <Card>
+            {(!!schema.group) && (<Card>
               <Card.Content>
                 <Card.Header textAlign="center">
-                 Ticket Name
+                  {schema.group}
                 </Card.Header>
                 <Card.Meta textAlign="center">
-                    {data.ticketName}
+                    {data[schema.group]}
                 </Card.Meta>
               </Card.Content>
-            </Card>
+            </Card>)}
             
           </Card.Group>
           <br />
           <br />
           <div style={{ display: "flex", flexDirection: 'row', justifyContent: "center"}}>
-            {(data.index >= 0) && (<Button onClick={() => this.changeStatus(data.index, data.checkin_status)} size={'big'} basic color={data.checkin_status? "red" : "blue"} >
+            {(data.index >= 0) && (<Button onClick={() => this.changeStatus(data.index, data.checkin_status, schema.group)} size={'big'} basic color={data.checkin_status? "red" : "blue"} >
                 {data.checkin_status? "Check Out" : "Check In"}
             </Button>)}
           </div>
@@ -204,7 +215,8 @@ const mapStateToProps = (state) => ({
   eventId: state.record.eventId,
   count: state.record.count,
   list: state.record.list,
-  schema: state.schema
+  schema: state.schema,
+  method: state.record.method
 })
 
-export default connect(mapStateToProps, { checkin:CheckInAction, checkout: CheckOutAction})(Registration)
+export default connect(mapStateToProps, { localCheckIn: localCheckInAction, localCheckOut: localCheckOutAction})(Registration)

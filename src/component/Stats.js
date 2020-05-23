@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Menu, Segment, Message, Statistic } from 'semantic-ui-react'
+import { Menu, Segment, Message, Statistic, Icon } from 'semantic-ui-react'
 import { connect } from 'react-redux';
 import { VictoryPie, VictoryBar, VictoryChart, VictoryTheme, VictoryAxis } from "victory";
 
@@ -25,12 +25,6 @@ class Stats extends Component {
     makeLocalTurnOut = () => {
         const {  count, checked } = this.props;
         
-        // let checkin = list.filter(x => x.checkin_status === true).length
-
-        // let total = list.length;
-
-        // let no_show = total - checkin
-
         this.setState({ 
             turnOut: [
                 {x: 1, y: checked},
@@ -38,20 +32,19 @@ class Stats extends Component {
                 {x: 3, y: (count - checked)},
             ],
             turnOutReady: true
-        })
-        
+        })   
     }
 
     makeLocalAllGroup = () => {
-        const {  list } = this.props;
+        const {  list, schema } = this.props;
         let groups = [];
 
         list.forEach(x => {
 
-            let index = groups.findIndex(i => i.x === x.ticketName);
+            let index = groups.findIndex(i => i.x === x[schema.group]);
 
             if (index < 0) {
-                groups.push({ x: x.ticketName, y: 1 })
+                groups.push({ x: x[schema.group], y: 1 })
             } else {
                 groups[index].y = groups[index].y + 1;
             }
@@ -65,21 +58,20 @@ class Stats extends Component {
     }
 
     makeLocalCheckedGroup = () => {
-        const {  list } = this.props;
-        let groups = [];
+        const {  schema, groups } = this.props;
+        // let groups = [];
 
-        list.forEach(x => {
-            if (x.checkin_status === true) {
-                let index = groups.findIndex(i => i.x === x.ticketName);
+        // list.forEach(x => {
+        //     if (x.checkin_status === true) {
+        //         let index = groups.findIndex(i => i.x === x[schema.group]);
 
-                if (index < 0) {
-                    groups.push({ x: x.ticketName, y: 1 })
-                } else {
-                    groups[index].y = groups[index].y + 1;
-                }
-
-            }
-        })
+        //         if (index < 0) {
+        //             groups.push({ x: x[schema.group], y: 1 })
+        //         } else {
+        //             groups[index].y = groups[index].y + 1;
+        //         }
+        //     }
+        // })
         
         this.setState({ 
             checkedGroups: groups,
@@ -91,14 +83,14 @@ class Stats extends Component {
     handleItemClick = (e, { name }) => this.setState({ activeItem: name }, () => {
         if (name === 'all groups' && !this.state.allGroupsReady) {
             this.makeLocalAllGroup()
-        } else if (name === 'checked in Groups' && !this.state.checkedGroupsReady) {
+        } else if (name === 'Group CheckedIn' && !this.state.checkedGroupsReady) {
             this.makeLocalCheckedGroup()
         }
     })
 
     render() {
         const { activeItem, turnOut, allGroups, allGroupsReady, turnOutReady, checkedGroups, checkedGroupsReady } = this.state;
-        const { count, checked } = this.props;
+        const { count, checked, schema } = this.props;
 
         return (
             <div>
@@ -109,15 +101,15 @@ class Stats extends Component {
                         active={activeItem === 'turn out'}
                         onClick={this.handleItemClick}
                     />
-                    <Menu.Item
+                    {/* {(!!schema.group) && (<Menu.Item
                         name='all groups'
                         active={activeItem === 'all groups'}
                         onClick={this.handleItemClick}
-                    />
-                    {(checked > 0) && (
+                    />)} */}
+                    {(checked > 0) && (!!schema.group) &&(
                     <Menu.Item
-                        name='checked in Groups'
-                        active={activeItem === 'checked in Groups'}
+                        name='Group CheckedIn'
+                        active={activeItem === 'Group CheckedIn'}
                         onClick={this.handleItemClick}
                     />)}
                     </Menu>
@@ -126,13 +118,18 @@ class Stats extends Component {
                 {(count === 0) && (<div>
                     <Message info>
                         <Message.Header>Info</Message.Header>
-                        <Message.Content>Add records to show stats</Message.Content>
+                        <Message.Content>Add records to show stats by pressing the <Icon name='content' /> icon and navigating to the records tab</Message.Content>
                     </Message>
                 </div>)}
 
-
+                {(count > 0) && (!schema.ID) && (<div>
+                    <Message info>
+                        <Message.Header>Info</Message.Header>
+                        <Message.Content> Modify your record schema by pressing the <Icon name='content' /> icon and navigating to the records tab </Message.Content>
+                    </Message>
+                </div>)}
                 
-                {(count > 0) && (<div>
+                {(count > 0) && (!!schema.ID) && (<div>
 
                     {(activeItem === 'turn out') && (
                     <Segment loading={!turnOutReady}>
@@ -208,7 +205,7 @@ class Stats extends Component {
                         )}
                     </Segment>)}
 
-                    {(activeItem === 'checked in Groups') && (
+                    {(activeItem === 'Group CheckedIn') && (
                     <Segment loading={!checkedGroupsReady}>
                         {(checkedGroupsReady) && (
                         <div style={{ width: '70%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
@@ -240,7 +237,9 @@ const mapStateToProps = (state) => ({
     eventId: state.record.eventId,
     count: state.record.count,
     checked: state.record.checked,
-    schema: state.schema
+    schema: state.schema,
+    method: state.record.method,
+    groups: state.record.groups
 })
 
 export default connect(mapStateToProps)(Stats)

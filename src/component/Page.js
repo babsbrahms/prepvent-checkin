@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Header, Icon, Message, Menu, Segment, Sidebar, Input } from 'semantic-ui-react';
+import { Header, Icon, Message, Menu, Segment, Sidebar } from 'semantic-ui-react';
 import Registration from './Registration';
 import Stats from './Stats';
 import Records from './Records'
