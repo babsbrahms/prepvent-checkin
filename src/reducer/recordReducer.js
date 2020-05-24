@@ -22,7 +22,7 @@ function recordReducer (state = init, action) {
 
         case LOCAL_CHECK_IN: 
             state.checked = state.checked + 1;
-            state.list[action.payload.id].checkin_status = true;
+            state.list[action.payload.id]._checkin_status = true;
             state.list[action.payload.id].timestamp = new Date().getTime();
             
             if (!!action.payload.group) {
@@ -46,7 +46,7 @@ function recordReducer (state = init, action) {
 
         case LOCAL_CHECK_OUT: 
             state.checked = state.checked - 1;
-            state.list[action.payload.id].checkin_status = false;
+            state.list[action.payload.id]._checkin_status = false;
             state.list[action.payload.id].timestamp = new Date().getTime();
 
             if (!!action.payload.group) {

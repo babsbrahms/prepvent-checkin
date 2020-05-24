@@ -5,7 +5,7 @@ let init = {
     ID: '',
     group: "",
     contact: "",
-    "Checkin Status": "checkin_status"
+    "Checkin Status": "_checkin_status"
 }
 
 function schemaReducer (state = init, action) {

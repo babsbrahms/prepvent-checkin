@@ -59,19 +59,6 @@ class Stats extends Component {
 
     makeLocalCheckedGroup = () => {
         const {  schema, groups } = this.props;
-        // let groups = [];
-
-        // list.forEach(x => {
-        //     if (x.checkin_status === true) {
-        //         let index = groups.findIndex(i => i.x === x[schema.group]);
-
-        //         if (index < 0) {
-        //             groups.push({ x: x[schema.group], y: 1 })
-        //         } else {
-        //             groups[index].y = groups[index].y + 1;
-        //         }
-        //     }
-        // })
         
         this.setState({ 
             checkedGroups: groups,

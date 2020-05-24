@@ -131,7 +131,7 @@ class Records extends Component {
 
   changeSearchField = (value) => this.setState({ searchField: value })
 
-  changeSearchValue = (value) => this.setState({ searchValue: value })
+  changeSearchValue = (value) => this.setState({ searchValue: value }, () => { if ( value === '') { this.setState({ searchResult: [] })}})
 
   searchList = () => {
     const { keys, method, list } = this.props;
@@ -296,7 +296,7 @@ class Records extends Component {
 
 
 
-        {(searchValue !== '') && (<List divided verticalAlign='middle'>
+        {(<List divided verticalAlign='middle'>
           {searchResult.map((result, index) => (<List.Item key={index}>
             <List.Content floated='right'>
               <Button>Add</Button>
@@ -320,7 +320,7 @@ class Records extends Component {
               <Table.HeaderCell>{schema.ID || "Registration Number"}</Table.HeaderCell>
               {(!!schema.contact) && (<Table.HeaderCell>{schema.contact || "Contact"}</Table.HeaderCell>)}
               {(!!schema.group) && (<Table.HeaderCell>{schema.group || "Group"}</Table.HeaderCell>)}
-              <Table.HeaderCell>{schema["Checkin Status"] || "Checkin Status"}</Table.HeaderCell>
+              <Table.HeaderCell>{"Checkin Status"}</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
     
@@ -331,7 +331,7 @@ class Records extends Component {
                 <Table.Cell>{li[schema.ID]}</Table.Cell>
                 {(!!schema.contact) && (<Table.Cell>{li[schema.contact]}</Table.Cell>)}
                 {(!!schema.group) && (<Table.Cell>{li[schema.group]}</Table.Cell>)}
-                <Table.Cell><Icon name={li.checkin_status? "checkmark": "close"} color={li.checkin_status? "green": "red"} /></Table.Cell>
+                <Table.Cell><Icon name={li._checkin_status? "checkmark": "close"} color={li._checkin_status? "green": "red"} /></Table.Cell>
               </Table.Row>
             ))}
           </Table.Body>

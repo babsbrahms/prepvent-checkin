@@ -183,8 +183,8 @@ class Registration extends Component {
           <br />
           <br />
           <div style={{ display: "flex", flexDirection: 'row', justifyContent: "center"}}>
-            {(dataIndex >= 0) && (<Button onClick={() => this.changeStatus(dataIndex, data.checkin_status, data[schema.group])} size={'big'} basic color={data.checkin_status? "red" : "blue"} >
-                {data.checkin_status? "Check Out" : "Check In"}
+            {(dataIndex >= 0) && (<Button onClick={() => this.changeStatus(dataIndex, data._checkin_status, data[schema.group])} size={'big'} basic color={data._checkin_status? "red" : "blue"} >
+                {data._checkin_status? "Check Out" : "Check In"}
             </Button>)}
           </div>
 

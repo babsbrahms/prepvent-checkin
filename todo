@@ -2,7 +2,7 @@
 [] max lenght of 100 for csv
 [] search by category in record
 [] add method to record
-[] make checkin_status flexible
+[] make _checkin_status flexible
 [] recormmend ID field
 [] validate schema ID AND contact
 
