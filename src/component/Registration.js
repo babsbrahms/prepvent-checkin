@@ -30,17 +30,24 @@ class Registration extends Component {
 
   onSubmit = () => {
     const { number } = this.state;
-    const {list, addAlert, removeAlert, schema} = this.props;
+    const {list, addAlert, removeAlert, schema, method } = this.props;
 
     removeAlert()
-    let index = list.findIndex(x => x[schema.ID] === number)
-    
-    if (index >= 0) {
-      this.setState({ data: { ...list[index], index }})
-    } else {
-      addAlert('Error', 'Record not found', false, false)
-      this.setState({ data: { }})
-    }  
+
+    this.setState({ loading: true }, () => {
+      if (method === 'local') {
+        let index = list.findIndex(x => x[schema.ID] === number);
+
+        if (index >= 0) {
+          this.setState({ data: { ...list[index], index }, loading: false })
+        } else {
+          addAlert('Error', 'Record not found', false, false)
+          this.setState({ data: { }, loading: false})
+        } 
+      } else {
+
+      }
+    }) 
   }
 
   changeStatus = (id, status, group) => {
@@ -119,7 +126,7 @@ class Registration extends Component {
           </div>)}
 
             {(count > 0) && (!!schema.ID) && (<div>
-              {(activeItem === 'scan') && (<div style={{ flex: 1 }}>
+              {(activeItem === 'scan') && (!loading) && (<div style={{ flex: 1 }}>
                 <BarcodeReader
                   onError={this.handleError}
                   onScan={this.handleScan}
@@ -200,7 +207,7 @@ class Registration extends Component {
           <br />
           <br />
           <div style={{ display: "flex", flexDirection: 'row', justifyContent: "center"}}>
-            {(data.index >= 0) && (<Button onClick={() => this.changeStatus(data.index, data.checkin_status, schema.group)} size={'big'} basic color={data.checkin_status? "red" : "blue"} >
+            {(data.index >= 0) && (<Button onClick={() => this.changeStatus(data.index, data.checkin_status, data[schema.group])} size={'big'} basic color={data.checkin_status? "red" : "blue"} >
                 {data.checkin_status? "Check Out" : "Check In"}
             </Button>)}
           </div>

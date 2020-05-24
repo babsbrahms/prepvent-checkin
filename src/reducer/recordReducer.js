@@ -16,7 +16,7 @@ let init = {
 function recordReducer (state = init, action) {
     switch (action.type) {
         case ADD_RECORD:
-            return state = { eventId: '', path: '', url: '', checked: 0, ...action.payload };
+            return state = { ...init ,...action.payload };
         case CLEAR_RECORD:
             return state = { }
 
@@ -24,17 +24,23 @@ function recordReducer (state = init, action) {
             state.checked = state.checked + 1;
             state.list[action.payload.id].checkin_status = true;
             state.list[action.payload.id].timestamp = new Date().getTime();
-            console.log('group: ', action.payload.group);
             
-            // if (!!action.payload.group) {
-            //     let index = state.groups.findIndex(i => i.x === action.payload.group);
-
-            //     if (index < 0) {
-            //         state.groups = [...state.groups, { x: action.payload.group, y: 1 }]
-            //     } else {
-            //         state.groups[index].y = state.groups[index].y + 1;
-            //     }
-            // }
+            if (!!action.payload.group) {
+                // let index = 0;
+                // if (state.groups.length === 0) {
+                //     index = -1;
+                // } else {
+                  let index = state.groups.findIndex(i => i.x === action.payload.group);
+                // }
+                 
+                if (index < 0) {
+                    // state.groups = [...state.groups, { x: action.payload.group, y: 1 }]
+                    state.groups.push({ x: action.payload.group, y: 1 })
+                } else {
+                    state.groups[index].y = state.groups[index].y + 1;
+                }
+  
+            }
 
             return state = { ...state }
 
@@ -43,15 +49,20 @@ function recordReducer (state = init, action) {
             state.list[action.payload.id].checkin_status = false;
             state.list[action.payload.id].timestamp = new Date().getTime();
 
-            // if (!!action.payload.group) {
-            //     let index = state.groups.findIndex(i => i.x === action.payload.group);
+            if (!!action.payload.group) {
+                let index = 0;
+                if (state.groups.length === 0) {
+                    index = -1;
+                } else {
+                   index = state.groups.findIndex(i => i.x === action.payload.group);
+                }
 
-            //     if (index < 0) {
-            //         state.groups = state.groups.splice(index, 1)
-            //     } else {
-            //         state.groups[index].y = state.groups[index].y - 1;
-            //     }
-            // }
+                if (index < 0) {
+                    state.groups = state.groups.splice(index, 1)
+                } else {
+                    state.groups[index].y = state.groups[index].y - 1;
+                }
+            }
 
             return state = { ...state }
 

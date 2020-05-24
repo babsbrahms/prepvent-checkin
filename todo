@@ -3,6 +3,8 @@
 [] search by category in record
 [] add method to record
 [] make checkin_status flexible
+[] recormmend ID field
+[] validate schema ID AND contact
 
 //chart
 [] by group (pia)

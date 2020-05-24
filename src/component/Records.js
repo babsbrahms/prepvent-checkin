@@ -5,12 +5,6 @@ import { connect } from 'react-redux'
 import validator from 'validator';
 import { addRecordAction, ModifySchemaAction } from '../action/record'
 
-const options = [
-  { key: 'all', text: 'Name', value: 'fullname' },
-  { key: 'registation', text: 'Registration Number', value: 'registrationNumber' },
-  { key: 'contact', text: 'Contact', value: 'contact' },
-  { key: 'ticketName', text: 'Ticket Name', value: 'ticketName' },
-];
 
 class Records extends Component {
     constructor(props) {
@@ -19,7 +13,10 @@ class Records extends Component {
           list: [],
           modalOpen: false,
           editSchema: props.schema,
-          keys: props.keys
+          // keys: props.keys,
+          searchField: '',
+          searchValue: "",
+          searchResult: []
         }
 
         this.uploader = React.createRef()
@@ -132,9 +129,30 @@ class Records extends Component {
     this.closeModal()
   }
 
+  changeSearchField = (value) => this.setState({ searchField: value })
+
+  changeSearchValue = (value) => this.setState({ searchValue: value })
+
+  searchList = () => {
+    const { keys, method, list } = this.props;
+    const { searchField, searchValue } = this.state;
+
+    let field = searchField || keys[0];
+    
+
+    if (method === 'local') {
+
+      this.setState({ searchResult: list.filter(x => x[field].toLocaleLowerCase() === searchValue.toLocaleLowerCase()) })
+      
+    } else {
+
+    }
+
+  }
+
   render () {
-      const { list, count, schema } = this.props;
-      const { editSchema, keys }  =this.state;
+      const { list, count, schema, checked, keys } = this.props;
+      const { editSchema }  =this.state;
       return (
         <div>
           {(count === 0) && (<div>
@@ -250,16 +268,16 @@ class Records extends Component {
               <Dropdown.Divider />
               {/* <Dropdown.Header>Export</Dropdown.Header> */}
               <Dropdown.Item 
-              // disabled={count === 0} 
+              disabled={checked > 0} 
               onClick={() => this.openModal()}>Schema</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
     
           <Menu.Menu position='right'>
-            <Input type='text' placeholder='Search...' action>
+            <Input type='text' placeholder='Search...' onChange={(e, { value }) => this.changeSearchValue(value)} action>
               <input />
-              <Select compact options={keys.map(x => ({ key: x, text: x, value: x }))} defaultValue='fullname' />
-              <Button type='submit'>Search</Button>
+              <Select compact options={keys.map(x => ({ key: x, text: x, value: x }))} onChange={(e, { value }) => this.changeSearchField(value)} defaultValue='fullname' />
+              <Button type='submit' disabled={keys.length === 0} onClick={() => this.searchList()}>Search</Button>
             </Input>
             {/* <div className='ui right aligned category search item'>
               <div className='ui transparent icon input'>
@@ -312,6 +330,7 @@ const mapStateToProps = (state) => ({
   list: state.record.list,
   eventId: state.record.eventId,
   count: state.record.count,
+  checked: state.record.checked,
   keys: state.record.keys,
   schema: state.schema,
   method: state.record.method
