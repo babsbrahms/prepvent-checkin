@@ -7,7 +7,7 @@ import Records from './Records'
 
 export default class page extends Component {
   state = {
-    activeItem: 'Stats',
+    activeItem: 'Records',
     visible: true,
     alert: {
       title: '',

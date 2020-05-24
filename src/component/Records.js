@@ -153,7 +153,7 @@ class Records extends Component {
 
   render () {
       const { list, count, schema, checked, keys } = this.props;
-      const { editSchema, searchResult }  =this.state;
+      const { editSchema, searchResult, searchValue }  =this.state;
       return (
         <div>
           {(count === 0) && (<div>
@@ -296,7 +296,7 @@ class Records extends Component {
 
 
 
-        <List divided verticalAlign='middle'>
+        {(searchValue !== '') && (<List divided verticalAlign='middle'>
           {searchResult.map((result, index) => (<List.Item key={index}>
             <List.Content floated='right'>
               <Button>Add</Button>
@@ -304,7 +304,7 @@ class Records extends Component {
 
             <List.Content>Lena</List.Content>
           </List.Item>))}
-        </List>
+        </List>)}
 
 
 
@@ -326,7 +326,7 @@ class Records extends Component {
     
           <Table.Body>
             {list.map((li, i) => (
-              <Table.Row key={i} positive>
+              <Table.Row key={i} >
                 {(schema.name) && (<Table.Cell>{li[schema.name]}</Table.Cell>)}
                 <Table.Cell>{li[schema.ID]}</Table.Cell>
                 {(!!schema.contact) && (<Table.Cell>{li[schema.contact]}</Table.Cell>)}
