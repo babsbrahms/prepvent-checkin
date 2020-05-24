@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Dropdown, Icon, Menu, Segment, Table, Input, Select, Button, Message, Modal, Header, Form, Divider } from 'semantic-ui-react'
+import { Dropdown, Icon, Menu, Segment, Table, Input, Select, Button, Message, Modal, Header, Form, Divider, List } from 'semantic-ui-react'
 import * as csv from "csvtojson";
 import { connect } from 'react-redux'
 import validator from 'validator';
@@ -137,11 +137,12 @@ class Records extends Component {
     const { keys, method, list } = this.props;
     const { searchField, searchValue } = this.state;
 
-    let field = searchField || keys[0];
+    let field = searchField !== ""? searchField : keys[keys.length -1] || "";
+    //console.log({ field, searchField, searchValue });
     
 
     if (method === 'local') {
-
+      
       this.setState({ searchResult: list.filter(x => x[field].toLocaleLowerCase() === searchValue.toLocaleLowerCase()) })
       
     } else {
@@ -152,7 +153,7 @@ class Records extends Component {
 
   render () {
       const { list, count, schema, checked, keys } = this.props;
-      const { editSchema }  =this.state;
+      const { editSchema, searchResult }  =this.state;
       return (
         <div>
           {(count === 0) && (<div>
@@ -292,6 +293,21 @@ class Records extends Component {
             </div> */}
           </Menu.Menu>
         </Menu>
+
+
+
+        <List divided verticalAlign='middle'>
+          {searchResult.map((result, index) => (<List.Item key={index}>
+            <List.Content floated='right'>
+              <Button>Add</Button>
+            </List.Content>
+
+            <List.Content>Lena</List.Content>
+          </List.Item>))}
+        </List>
+
+
+
         {(<div style={{ height: 0, width: 0}}>
           <Input ref={x => this.uploader = x} id={'list-uploader'} type= 'file' onChange={this.onUpload} />
         </div>)}

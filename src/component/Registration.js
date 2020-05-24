@@ -5,15 +5,23 @@ import { connect } from 'react-redux';
 import { localCheckInAction, localCheckOutAction } from "../action/record"
 
 class Registration extends Component {
-  state = { 
-    activeItem: 'scan', 
-    number: '', 
-    loading: false,
-    data: {
+  constructor (props) {
+    super(props);
 
-    },
-    ready: false
+    this.state = { 
+      activeItem: 'scan', 
+      number: '', 
+      loading: false,
+      data: {
+
+      },
+      ready: false,
+      dataIndex: -1
+    }
+
+    this.input = React.createRef()
   }
+  
 
   handleItemClick = (e, { name }) => this.setState({ activeItem: name })
 
@@ -38,12 +46,13 @@ class Registration extends Component {
       if (method === 'local') {
         let index = list.findIndex(x => x[schema.ID] === number);
 
-        if (index >= 0) {
-          this.setState({ data: { ...list[index], index }, loading: false })
+        if (index >= 0) { 
+          this.setState({ data: list[index], loading: false, dataIndex: index })
         } else {
           addAlert('Error', 'Record not found', false, false)
           this.setState({ data: { }, loading: false})
         } 
+
       } else {
 
       }
@@ -57,7 +66,7 @@ class Registration extends Component {
         if (status) {
           localCheckOut(id, group)
           .then(() => {
-            this.setState({ data: { }, loading: false, number: '' })
+            this.setState({ data: { }, loading: false, number: '', dataIndex: -1 })
           })
           .catch(() => {
             addAlert('Error', 'Problem checking out', false, false);
@@ -66,7 +75,7 @@ class Registration extends Component {
         } else {
           localCheckIn(id, group)
           .then(() => {
-            this.setState({ data: { }, loading: false, number: '' })
+            this.setState({ data: { }, loading: false, number: '', dataIndex: -1 })
           })
           .catch(() => {
             addAlert('Error', 'Problem checking in', false, false);
@@ -76,12 +85,16 @@ class Registration extends Component {
       } else {
         
       }
+
+      if (this.input) {
+        this.input.focus()   
+      }
     })
   }
 
   render() {
-    const { activeItem, number, loading, data } = this.state;
-    const { count, schema } = this.props;
+    const { activeItem, number, loading, data, dataIndex } = this.state;
+    const { count, schema, keys } = this.props;
 
     return (
       <div>
@@ -138,6 +151,7 @@ class Registration extends Component {
                 <Form onSubmit={() => this.onSubmit()}>
                 
                   <Input
+                    ref={x => this.input = x}
                     value={number}
                     icon={<Icon name='filter' color='pink' inverted  link onClick={() => this.onSubmit()} />}
                     placeholder={`Enter ${schema.ID}`}
@@ -155,59 +169,21 @@ class Registration extends Component {
             <br />
 
           <Card.Group centered>
-            {(!!schema.name) && (<Card>
-              <Card.Content>
+            {keys.map( (key, index) => (<Card>
+              <Card.Content key={index}>
                 <Card.Header textAlign="center">
-                  {schema.name}
+                  {key}
                 </Card.Header>
                 <Card.Meta textAlign="center">
-                  {data[schema.name]}
+                  {data[key]}
                 </Card.Meta>
               </Card.Content>
-            </Card>)}
-
-
-            {(!!schema.ID) && (<Card>
-              <Card.Content>
-                <Card.Header textAlign="center">
-                  {schema.ID}
-                </Card.Header>
-                <Card.Meta textAlign="center">
-                  {data[schema.ID]}
-                </Card.Meta>
-              </Card.Content>
-            </Card>)}
-
-
-            {(!!schema.contact) && (<Card>
-              <Card.Content>
-                <Card.Header textAlign="center">
-                  {schema.contact}
-                </Card.Header>
-                <Card.Meta textAlign="center">
-                  {data[schema.contact]}
-                </Card.Meta>
-              </Card.Content>
-            </Card>)}
-
-
-
-            {(!!schema.group) && (<Card>
-              <Card.Content>
-                <Card.Header textAlign="center">
-                  {schema.group}
-                </Card.Header>
-                <Card.Meta textAlign="center">
-                    {data[schema.group]}
-                </Card.Meta>
-              </Card.Content>
-            </Card>)}
-            
+            </Card>))}            
           </Card.Group>
           <br />
           <br />
           <div style={{ display: "flex", flexDirection: 'row', justifyContent: "center"}}>
-            {(data.index >= 0) && (<Button onClick={() => this.changeStatus(data.index, data.checkin_status, data[schema.group])} size={'big'} basic color={data.checkin_status? "red" : "blue"} >
+            {(dataIndex >= 0) && (<Button onClick={() => this.changeStatus(dataIndex, data.checkin_status, data[schema.group])} size={'big'} basic color={data.checkin_status? "red" : "blue"} >
                 {data.checkin_status? "Check Out" : "Check In"}
             </Button>)}
           </div>
@@ -223,7 +199,8 @@ const mapStateToProps = (state) => ({
   count: state.record.count,
   list: state.record.list,
   schema: state.schema,
-  method: state.record.method
+  method: state.record.method,
+  keys: state.record.keys
 })
 
 export default connect(mapStateToProps, { localCheckIn: localCheckInAction, localCheckOut: localCheckOutAction})(Registration)
