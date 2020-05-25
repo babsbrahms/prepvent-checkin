@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Input, Menu, Segment, Card, Icon, Form, Message, Button } from 'semantic-ui-react';
+import { Input, Menu, Segment, Card, Icon, Form, Message, Button, List, Feed, Select } from 'semantic-ui-react';
 import BarcodeReader from 'react-barcode-reader';
 import { connect } from 'react-redux';
 import { localCheckInAction, localCheckOutAction } from "../action/record"
@@ -9,14 +9,16 @@ class Registration extends Component {
     super(props);
 
     this.state = { 
-      activeItem: 'scan', 
+      activeItem: 'input', 
       number: '', 
       loading: false,
-      data: {
-
-      },
+      data: {},
       ready: false,
-      dataIndex: -1
+      dataIndex: -1,
+      searchField: '',
+      searchValue: "",
+      searchResult: [],
+      searching: false
     }
 
     this.input = React.createRef()
@@ -86,41 +88,115 @@ class Registration extends Component {
         
       }
 
-      if (this.input) {
+      if (this.input && this.input.current) {
         this.input.focus()   
       }
     })
   }
 
+
+  changeSearchField = (value) => this.setState({ searchField: value })
+
+  changeSearchValue = (value) => this.setState({ searchValue: value }, () => { if ( value === '') { this.setState({ searchResult: [] })}})
+
+  searchList = () => {
+    const { keys, method, list, addAlert, removeAlert } = this.props;
+    const { searchField, searchValue } = this.state;
+
+    // let field = searchField !== ""? searchField : keys[0] || "";
+    // console.log({ field, searchField, searchValue });
+    
+    removeAlert();
+
+    if (searchValue === '') {
+      addAlert('Warning', 'Add search value ...', false, false)
+      return
+    } else if (searchField === ''){
+      addAlert('Warning', 'Add search field ...', false, false);
+      return
+    }
+
+    this.setState({ searching: true }, () => {
+      if (method === 'local') {
+        
+        this.setState({ searching: false, searchResult: list.filter(x => x[searchField].toLocaleLowerCase().includes(searchValue.toLocaleLowerCase())) })
+        
+      } else {
+
+      }
+    })
+
+  }
+
+  changeSearchStatus = (id, status, group) => {
+    const { list, schema } = this.props;
+    this.setState({ loading: true }, () => {
+      let index = list.findIndex(x => x[schema.ID] === id);
+      this.changeStatus(index, id, status, group)
+    })
+  }
+
+
   render() {
-    const { activeItem, number, loading, data, dataIndex } = this.state;
+    const { activeItem, number, loading, data, dataIndex, searchResult, searchField, searchValue, searching } = this.state;
     const { count, schema, keys } = this.props;
 
     return (
       <div>
         <Menu attached='top' tabular>
-          <Menu.Item
+          {/* <Menu.Item
             name='scan'
             icon='barcode'
             active={activeItem === 'scan'}
             onClick={this.handleItemClick}
-          />
+          /> */}
           <Menu.Item
             name='input'
             icon="pencil"
             active={activeItem === 'input'}
             onClick={this.handleItemClick}
           />
-          {/* <Menu.Menu position='right'>
-            <Menu.Item>
-              <Input
-                transparent
-                icon={{ name: 'search', link: true }}
-                placeholder='Search users...'
-              />
-            </Menu.Item>
-          </Menu.Menu> */}
+          <Menu.Menu position='right'>
+            <Input type='text' placeholder='Search...' onChange={(e, { value }) => this.changeSearchValue(value)} defaultValue={searchValue}  action>
+              <input />
+              <Select compact options={keys.map(x => ({ key: x, text: x, value: x }))} onChange={(e, { value }) => this.changeSearchField(value)} defaultValue={searchField} />
+              <Button type='submit' disabled={((keys.length === 0) || (schema.ID === ''))} onClick={() => this.searchList()}>Search</Button>
+            </Input>
+          </Menu.Menu>
         </Menu>
+
+        {((searchResult.length > 0) || (searching === true)) && (
+        <Segment loading={searching || loading}>
+            <List celled verticalAlign='middle' horizontal>
+              {searchResult.map((result, index) => (<List.Item key={index}>
+                <List.Content>
+                    <Card>
+                      <Card.Content>
+                      <Card.Header>Result {index + 1 }</Card.Header>
+                      </Card.Content>
+                      <Card.Content>
+                        {keys.map( (key, index) => (
+                        <Feed key={`feed-${index}`}>
+                          <Feed.Event>
+                            <Feed.Content>
+                              <Feed.Date content={key} />
+                              <Feed.Summary>
+                                {result[key]}
+                              </Feed.Summary>
+                            </Feed.Content>
+                          </Feed.Event>
+                        </Feed>))}  
+                      </Card.Content>
+                      <Card.Content>
+                        <Button fluid onClick={() => this.changeSearchStatus(result[schema.ID], result._checkin_status, result[schema.group])} size={'big'} basic color={result._checkin_status? "red" : "blue"} >
+                            {result._checkin_status? "Check Out" : "Check In"}
+                        </Button>
+                      </Card.Content>
+                    </Card>
+                </List.Content>
+              </List.Item>))}
+            </List>
+        </Segment>)}
 
         <Segment loading={loading} attached='bottom'>
           <section>

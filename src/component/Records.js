@@ -13,10 +13,11 @@ class Records extends Component {
           list: [],
           modalOpen: false,
           editSchema: props.schema,
-          loading: true,
+          loading: false,
           searchField: '',
           searchValue: "",
-          searchResult: []
+          searchResult: [],
+          searching: false
         }
 
         this.uploader = React.createRef()
@@ -137,21 +138,29 @@ class Records extends Component {
     const { keys, method, list, addAlert, removeAlert } = this.props;
     const { searchField, searchValue } = this.state;
 
-    let field = searchField !== ""? searchField : keys[keys.length -1] || "";
-    console.log({ field, searchField, searchValue });
+    // let field = searchField !== ""? searchField : keys[0] || "";
     
-    removeAlert()
-    if (searchValue !== '') {
+    removeAlert();
+
+    if (searchValue === '') {
+      addAlert('Warning', 'Add search value ...', false, false)
+      return
+    } else if (searchField === ''){
+      addAlert('Warning', 'Add search field ...', false, false);
+      return
+    }
+
+    this.setState({ searching: true }, () => {
       if (method === 'local') {
         
-        this.setState({ searchResult: list.filter(x => x[field].toLocaleLowerCase().includes(searchValue.toLocaleLowerCase())) })
+        this.setState({ searching: false, searchResult: list.filter(x => x[searchField].toLocaleLowerCase().includes(searchValue.toLocaleLowerCase())) })
         
       } else {
 
       }
-    } else {
-      addAlert('Warning', 'Add search value ...', false, false)
-    }
+    })
+
+    //}
 
   }
 
@@ -187,7 +196,7 @@ class Records extends Component {
 
   render () {
       const { list, count, schema, checked, keys } = this.props;
-      const { editSchema, searchResult, searchValue }  =this.state;
+      const { editSchema, searchResult, searchValue, searchField, loading, searching }  =this.state;
       return (
         <div>
           {(count === 0) && (<div>
@@ -235,8 +244,8 @@ class Records extends Component {
                     <Table.Cell>ID</Table.Cell>
                     <Table.Cell>
                       <Dropdown defaultValue={editSchema.ID} name="ID" key={'id'} onChange={(e, { name, value}) => this.changeSchema(name, value)}  clearable options={keys.map(x => ({ key: x, text: x, value: x }))} selection />
-                      <Divider horizontal>Or</Divider>
-                      <Button fluid basic color={'blue'}>GENERATE</Button>
+                      {/* <Divider horizontal>Or</Divider>
+                      <Button fluid basic color={'blue'}>GENERATE</Button> */}
                     </Table.Cell>
                     <Table.Cell>A unique identifier for each attendee in the rocord.</Table.Cell>
                     <Table.Cell><Icon name="checkmark" /></Table.Cell>
@@ -309,27 +318,17 @@ class Records extends Component {
           </Dropdown>
     
           <Menu.Menu position='right'>
-            <Input type='text' placeholder='Search...' onChange={(e, { value }) => this.changeSearchValue(value)} action>
+            <Input type='text' placeholder='Search...' onChange={(e, { value }) => this.changeSearchValue(value)} defaultValue={searchValue} action>
               <input />
-              <Select compact options={keys.map(x => ({ key: x, text: x, value: x }))} onChange={(e, { value }) => this.changeSearchField(value)} defaultValue='fullname' />
+              <Select compact options={keys.map(x => ({ key: x, text: x, value: x }))} onChange={(e, { value }) => this.changeSearchField(value)} defaultValue={searchField} />
               <Button type='submit' disabled={((keys.length === 0) || (schema.ID === ''))} onClick={() => this.searchList()}>Search</Button>
             </Input>
-            {/* <div className='ui right aligned category search item'>
-              <div className='ui transparent icon input'>
-                <input
-                  className='prompt'
-                  type='text'
-                  placeholder='Search records...'
-                />
-                <i className='search link icon' />
-              </div>
-              <div className='results' />
-            </div> */}
           </Menu.Menu>
         </Menu>
 
 
-        {(<Segment loading>
+        {((searchResult.length > 0) || (searching === true)) && (
+        <Segment loading={searching || loading}>
             <List celled verticalAlign='middle' horizontal>
               {searchResult.map((result, index) => (<List.Item key={index}>
                 <List.Content>
