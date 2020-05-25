@@ -1,6 +1,6 @@
 [] download csv
 [] max lenght of 100 for csv
-[] search by category in record
+[x] search by category in record
 [] add method to record
 [] make _checkin_status flexible
 [] recormmend ID field

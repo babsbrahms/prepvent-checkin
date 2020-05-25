@@ -59,12 +59,12 @@ class Registration extends Component {
     }) 
   }
 
-  changeStatus = (id, status, group) => {
+  changeStatus = (index, id, status, group) => {
     const { localCheckOut, localCheckIn, addAlert, method } = this.props;
     this.setState({ loading: true }, () => {
       if (method === 'local') {
         if (status) {
-          localCheckOut(id, group)
+          localCheckOut(index, group)
           .then(() => {
             this.setState({ data: { }, loading: false, number: '', dataIndex: -1 })
           })
@@ -73,7 +73,7 @@ class Registration extends Component {
             this.setState({ loading: false, number: '' })
           })
         } else {
-          localCheckIn(id, group)
+          localCheckIn(index, group)
           .then(() => {
             this.setState({ data: { }, loading: false, number: '', dataIndex: -1 })
           })
@@ -183,7 +183,7 @@ class Registration extends Component {
           <br />
           <br />
           <div style={{ display: "flex", flexDirection: 'row', justifyContent: "center"}}>
-            {(dataIndex >= 0) && (<Button onClick={() => this.changeStatus(dataIndex, data._checkin_status, data[schema.group])} size={'big'} basic color={data._checkin_status? "red" : "blue"} >
+            {(dataIndex >= 0) && (<Button onClick={() => this.changeStatus(dataIndex, data[schema.ID], data._checkin_status, data[schema.group])} size={'big'} basic color={data._checkin_status? "red" : "blue"} >
                 {data._checkin_status? "Check Out" : "Check In"}
             </Button>)}
           </div>
@@ -201,6 +201,11 @@ const mapStateToProps = (state) => ({
   schema: state.schema,
   method: state.record.method,
   keys: state.record.keys
-})
+});
 
-export default connect(mapStateToProps, { localCheckIn: localCheckInAction, localCheckOut: localCheckOutAction})(Registration)
+const mapDispatchToProps = {
+  localCheckIn: localCheckInAction, 
+  localCheckOut: localCheckOutAction
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Registration)

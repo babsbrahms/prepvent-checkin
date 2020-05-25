@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import { Dropdown, Icon, Menu, Segment, Table, Input, Select, Button, Message, Modal, Header, Form, Divider, List } from 'semantic-ui-react'
+import { Dropdown, Icon, Menu, Segment, Table, Input, Select, Button, Message, Modal, Header, Form, Divider, List, Card, Feed } from 'semantic-ui-react'
 import * as csv from "csvtojson";
 import { connect } from 'react-redux'
 import validator from 'validator';
-import { addRecordAction, ModifySchemaAction } from '../action/record'
+import { addRecordAction, ModifySchemaAction, localCheckInAction, localCheckOutAction } from '../action/record'
 
 
 class Records extends Component {
@@ -13,7 +13,7 @@ class Records extends Component {
           list: [],
           modalOpen: false,
           editSchema: props.schema,
-          // keys: props.keys,
+          loading: true,
           searchField: '',
           searchValue: "",
           searchResult: []
@@ -30,7 +30,7 @@ class Records extends Component {
         e.preventDefault()
         if (e.target.files.length > 0) {
             if (window.FileReader) {
-                if (e.target.files[0].type === "text/csv" || "application/vnd.ms-excel") {
+                if (["application/vnd.ms-excel", "text/csv"].indexOf(e.target.files[0].type) > -1 ) {
                     // FileReader are supported.;
                     var reader = new FileReader();
                     // Read file into memory as UTF-8      
@@ -134,21 +134,55 @@ class Records extends Component {
   changeSearchValue = (value) => this.setState({ searchValue: value }, () => { if ( value === '') { this.setState({ searchResult: [] })}})
 
   searchList = () => {
-    const { keys, method, list } = this.props;
+    const { keys, method, list, addAlert, removeAlert } = this.props;
     const { searchField, searchValue } = this.state;
 
     let field = searchField !== ""? searchField : keys[keys.length -1] || "";
-    //console.log({ field, searchField, searchValue });
+    console.log({ field, searchField, searchValue });
     
+    removeAlert()
+    if (searchValue !== '') {
+      if (method === 'local') {
+        
+        this.setState({ searchResult: list.filter(x => x[field].toLocaleLowerCase().includes(searchValue.toLocaleLowerCase())) })
+        
+      } else {
 
-    if (method === 'local') {
-      
-      this.setState({ searchResult: list.filter(x => x[field].toLocaleLowerCase() === searchValue.toLocaleLowerCase()) })
-      
+      }
     } else {
-
+      addAlert('Warning', 'Add search value ...', false, false)
     }
 
+  }
+
+  changeSearchStatus = (id, status, group) => {
+    const { localCheckOut, localCheckIn, addAlert, method, list, schema } = this.props;
+    this.setState({ loading: true }, () => {
+      if (method === 'local') {
+        let index = list.findIndex(x => x[schema.ID] === id);
+        if (status) {
+          localCheckOut(index, group)
+          .then(() => {
+            this.setState({ data: { }, loading: false, number: '', dataIndex: -1 })
+          })
+          .catch(() => {
+            addAlert('Error', 'Problem checking out', false, false);
+            this.setState({ loading: false, number: '' })
+          })
+        } else {
+          localCheckIn(index, group)
+          .then(() => {
+            this.setState({ data: { }, loading: false, number: '', dataIndex: -1 })
+          })
+          .catch(() => {
+            addAlert('Error', 'Problem checking in', false, false);
+            this.setState({ loading: false, number: '' })
+          })
+        }
+      } else {
+        
+      }
+    })
   }
 
   render () {
@@ -278,7 +312,7 @@ class Records extends Component {
             <Input type='text' placeholder='Search...' onChange={(e, { value }) => this.changeSearchValue(value)} action>
               <input />
               <Select compact options={keys.map(x => ({ key: x, text: x, value: x }))} onChange={(e, { value }) => this.changeSearchField(value)} defaultValue='fullname' />
-              <Button type='submit' disabled={keys.length === 0} onClick={() => this.searchList()}>Search</Button>
+              <Button type='submit' disabled={((keys.length === 0) || (schema.ID === ''))} onClick={() => this.searchList()}>Search</Button>
             </Input>
             {/* <div className='ui right aligned category search item'>
               <div className='ui transparent icon input'>
@@ -295,16 +329,37 @@ class Records extends Component {
         </Menu>
 
 
-
-        {(<List divided verticalAlign='middle'>
-          {searchResult.map((result, index) => (<List.Item key={index}>
-            <List.Content floated='right'>
-              <Button>Add</Button>
-            </List.Content>
-
-            <List.Content>Lena</List.Content>
-          </List.Item>))}
-        </List>)}
+        {(<Segment loading>
+            <List celled verticalAlign='middle' horizontal>
+              {searchResult.map((result, index) => (<List.Item key={index}>
+                <List.Content>
+                    <Card>
+                      <Card.Content>
+                      <Card.Header>Result {index + 1 }</Card.Header>
+                      </Card.Content>
+                      <Card.Content>
+                        {keys.map( (key, index) => (
+                        <Feed key={`feed-${index}`}>
+                          <Feed.Event>
+                            <Feed.Content>
+                              <Feed.Date content={key} />
+                              <Feed.Summary>
+                                {result[key]}
+                              </Feed.Summary>
+                            </Feed.Content>
+                          </Feed.Event>
+                        </Feed>))}  
+                      </Card.Content>
+                      <Card.Content>
+                        <Button fluid onClick={() => this.changeSearchStatus(result[schema.ID], result._checkin_status, result[schema.group])} size={'big'} basic color={result._checkin_status? "red" : "blue"} >
+                            {result._checkin_status? "Check Out" : "Check In"}
+                        </Button>
+                      </Card.Content>
+                    </Card>
+                </List.Content>
+              </List.Item>))}
+            </List>
+        </Segment>)}
 
 
 
@@ -354,7 +409,9 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = {
   addRecord: addRecordAction,
-  modifySchema: ModifySchemaAction
+  modifySchema: ModifySchemaAction,
+  localCheckIn: localCheckInAction, 
+  localCheckOut: localCheckOutAction
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Records)
