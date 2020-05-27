@@ -3,6 +3,7 @@ import { Dropdown, Icon, Menu, Segment, Table, Input, Select, Button, Message, M
 import * as csv from "csvtojson";
 import { connect } from 'react-redux'
 import validator from 'validator';
+import { Parser } from 'json2csv';
 import { addRecordAction, ModifySchemaAction, localCheckInAction, localCheckOutAction } from '../action/record'
 
 
@@ -70,6 +71,7 @@ class Records extends Component {
       })
       .fromString(csvString)
       .then((result) =>{
+        console.log(result);
         
         if (result.length > 0) {
             //let contact = result.map(res =>(res.phone))
@@ -95,12 +97,86 @@ class Records extends Component {
       document.getElementById('list-uploader').click()
     }
 
+  testList = () => {
+    let list = [
+      {
+        "ticketId": "5e9e9ebbd4a31c2d009f481c",
+        "registrationNumber": "C3",
+        "contact": "tola@gmail.com",
+        "ticketName": "Free",
+        "ticketType": "free",
+        "ticketPrice": "0",
+        "fullname": "tola"
+      },
+      {
+        "ticketId": "5e9e9ebbd4a31c2d009f481c",
+        "registrationNumber": "C2",
+        "contact": "billy@gmail.com",
+        "ticketName": "Free",
+        "ticketType": "free",
+        "ticketPrice": "0",
+        "fullname": "billy"
+      },
+      {
+        "ticketId": "5e9e9ebbd4a31c2d009f481c",
+        "registrationNumber": "C1",
+        "contact": "smith@gmail.com",
+        "ticketName": "Free",
+        "ticketType": "free",
+        "ticketPrice": "0",
+        "fullname": "smith"
+      },
+      {
+        "ticketId": "5e9e9ebbd4a31c2d009f481c",
+        "registrationNumber": "B3",
+        "contact": "james@gmail.com",
+        "ticketName": "Donation",
+        "ticketType": "donation",
+        "ticketPrice": "2000",
+        "fullname": "james"
+      },
+      {
+        "ticketId": "5e9e9ebbd4a31c2d009f481c",
+        "registrationNumber": "B2",
+        "contact": "babs@gmail.com",
+        "ticketName": "Donation",
+        "ticketType": "donation",
+        "ticketPrice": "2000",
+        "fullname": "babs"
+      },
+      {
+        "ticketId": "5e9e9ebbd4a31c2d009f481c",
+        "registrationNumber": "B1",
+        "contact": "tim@gmail.com",
+        "ticketName": "Donation",
+        "ticketType": "donation",
+        "ticketPrice": "2000",
+        "fullname": "tim"
+      },
+      {
+        "ticketId": "5e9e9ebbd4a31c2d009f481c",
+        "registrationNumber": "A1",
+        "contact": "ibrahim@gmail.com",
+        "ticketName": "General Admission",
+        "ticketType": "paid",
+        "ticketPrice": "2500",
+        "fullname": "ibrahim"
+      }
+    ]
+
+    let json2csvParser = new Parser();
+    let csv = json2csvParser.parse(list);
+
+    this.startDownload(`test.csv`, csv);
+  }
 
   getRegistrationList = () => {
-      const { list } = this.props;
-      // csvtojson({})
-      this.startDownload(`Registeration List.csv`, list);
+      const { list, filename } = this.props;
 
+      let json2csvParser = new Parser();
+      let csv = json2csvParser.parse(list);
+
+      this.startDownload(`${filename}.csv`, csv);
   }
 
   startDownload = (filename, text) => {
@@ -202,14 +278,14 @@ class Records extends Component {
           {(count === 0) && (<div>
             <Message info>
                 <Message.Header>Info</Message.Header>
-                <Message.Content>Import records using the <Icon name='wrench' /> icon </Message.Content>
+                <Message.Content>Import records using the <Icon name='wrench' /> icon.  You can download a CSV file for testing using this download icon <Icon onClick={() => this.testList()} name="download"/> </Message.Content>
             </Message>
         </div>)}
 
         {(count > 0) && (!schema.ID) && (<div>
             <Message info>
                 <Message.Header>Info</Message.Header>
-                <Message.Content> Add ID key to your record schema by using the <Icon name='wrench' /> icon </Message.Content>
+                <Message.Content> Add ID key to your record schema by using the <Icon name='wrench' /> icon. </Message.Content>
             </Message>
         </div>)}
 
@@ -291,7 +367,7 @@ class Records extends Component {
         <Menu attached='top'>
           <Dropdown item icon='wrench' simple>
             <Dropdown.Menu>
-              <Dropdown.Item>
+              {/* <Dropdown.Item>
                 <Icon name='dropdown' />
                 <span className='text'>Import</span>
     
@@ -303,11 +379,16 @@ class Records extends Component {
               <Dropdown.Item disabled={count === 0} >
               <Icon name='dropdown' />
                 <span className='text'>Save</span>
-    
                 <Dropdown.Menu>
-                  <Dropdown.Item>Locally</Dropdown.Item>
+                  <Dropdown.Item onClick={() => this.getRegistrationList()}>Locally</Dropdown.Item>
                   <Dropdown.Item disabled>Online</Dropdown.Item>
                 </Dropdown.Menu>
+              </Dropdown.Item> */}
+              <Dropdown.Item onClick={() => this.addCsv()}>
+                Import CSV file
+              </Dropdown.Item>
+              <Dropdown.Item disabled={count === 0} onClick={() => this.getRegistrationList()} >
+                Save
               </Dropdown.Item>
               <Dropdown.Divider />
               {/* <Dropdown.Header>Export</Dropdown.Header> */}
@@ -403,7 +484,8 @@ const mapStateToProps = (state) => ({
   checked: state.record.checked,
   keys: state.record.keys,
   schema: state.schema,
-  method: state.record.method
+  method: state.record.method,
+  filename: state.record.filename
 })
 
 const mapDispatchToProps = {
