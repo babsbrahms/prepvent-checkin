@@ -1,4 +1,22 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# PrepVENT Check In
+
+App for checking in attendees to an event and managing their records.
+
+[App Link](https://prepvent-checkin.herokuapp.com/)
+
+## Technology Used
+- React
+- Redux
+- Victory
+
+## Features
+- Ability to import user record or input it manually
+- Full configuration of user record with schema
+- Graphical display that shows the number Of attendees present and absent
+- Attendee check-in
+- Ability to download CSV record of an event
+
+
 
 ## Available Scripts
 
